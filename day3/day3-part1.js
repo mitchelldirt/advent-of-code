@@ -12,7 +12,7 @@ function readFile(filePath) {
   }
 }
 
-readFile('./inputFiles/day3Input.txt')
+readFile('./day3Input.txt')
 // END OF GET FILE INPUT
 
 const findDuplicate = (string1, string2) => {
