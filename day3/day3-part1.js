@@ -1,6 +1,5 @@
 // GET FILE INPUT
 const fs = require('fs');
-const { get } = require('http');
 let input;
 
 function readFile(filePath) {
