@@ -1,17 +1,16 @@
 // GET FILE INPUT
 const fs = require('fs');
-let input;
 
 function readFile(filePath) {
   try {
     const data = fs.readFileSync(filePath);
-    input = data.toString()
+    return data.toString();
   } catch (error) {
     console.error(`Got an error trying to read the file: ${error.message}`);
   }
 }
 
-readFile('./day3Input.txt')
+const input = readFile('./day3/day3Input.txt');
 // END OF GET FILE INPUT
 
 const findDuplicate = (string1, string2) => {
