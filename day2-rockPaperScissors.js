@@ -1,12 +1,93 @@
-const totalScore = (games) => {
-games = games.split(`
-`);
+const setPlayerMove = (playerOutcome, opMove) => {
+if (playerOutcome === 2) playerOutcome = opMove;
 
-return games
+else if ((opMove === 3 || opMove === 1) && playerOutcome === 1) {
+  opMove === 3 ? playerOutcome = 2 : playerOutcome = 3; 
 }
 
-const allGames = 
-`C Z
+else if ((opMove === 3 || opMove === 1) && playerOutcome === 3) {
+  opMove === 3 ? playerOutcome = 1 : playerOutcome = 2;  
+}
+
+else if (playerOutcome === 1) {
+  playerOutcome = opMove - 1;
+}
+
+else if (playerOutcome === 3) {
+  playerOutcome = opMove + 1;
+}
+
+return playerOutcome;
+}
+
+const calculateScores = (gameString) => {
+  let opScore = 0;
+  let playerScore = 0;
+
+  let opMove;
+  let playerMove;
+
+  if (gameString.includes('X')) {
+    playerMove = 1;
+  }
+  if (gameString.includes('Y')) {
+    playerMove = 2;
+  }
+  if (gameString.includes('Z')) {
+    playerMove = 3;
+  }
+  if (gameString.includes('A')) {
+    opScore += 1;
+    opMove = 1;
+    playerMove = setPlayerMove(playerMove, 1);
+  }
+  if (gameString.includes('B')) {
+    opScore += 2;
+    opMove = 2;
+    playerMove = setPlayerMove(playerMove, 2);
+  }
+  if (gameString.includes('C')) {
+    opScore += 3;
+    opMove = 3;
+    playerMove = setPlayerMove(playerMove, 3);
+  }
+
+playerScore += playerMove;
+
+  if ((opMove === 1 && playerMove === 3) || (opMove === 3 && playerMove === 1)) {
+    opMove === 1 ? opScore += 6 : playerScore += 6
+  } else if (playerMove > opMove) {
+    playerScore += 6
+  } else if (opMove > playerMove) {
+    opScore += 6
+  } else if (playerMove === opMove) {
+    opScore += 3;
+    playerScore += 3;
+  }
+
+
+  return { opScore, playerScore };
+}
+
+const totalScore = (games) => {
+  let opScore = 0;
+  let playerScore = 0;
+  games = games.split(`
+`);
+
+  for (let game of games) {
+    let result = calculateScores(game);
+    opScore += result.opScore;
+    playerScore += result.playerScore;
+  }
+
+  return { opScore, playerScore }
+}
+
+
+
+const allGames =
+  `C Z
 C Z
 A Y
 A X
@@ -2507,4 +2588,5 @@ A X
 A Y
 C X`
 
+// console.log(totalScore(allGames));
 console.log(totalScore(allGames));
