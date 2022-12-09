@@ -1,52 +1,43 @@
-const input =
-  `$ ls
-dir a
-14848514 b.txt
-8504156 c.dat
-dir d
-$ cd a
-$ ls
-dir e
-29116 f
-2557 g
-62596 h.lst
-$ cd e
-$ ls
-584 i
-$ cd ..
-$ cd ..
-$ cd d
-$ ls
-4060174 j
-8033020 d.log
-5626152 d.ext
-7214296 k`;
+// GET FILE INPUT
+const fs = require('fs');
 
-function factoryDirectory(filesArray, directoriesArray, existingDirectory) {
-  // let directory = {
-  //   files: filesArray
-  // }
-
-  // if (!existingDirectory) existingDirectory = directory;
-  if (filesArray.length > 0) {
-    existingDirectory.files = filesArray
+function readFile(filePath) {
+  try {
+    const data = fs.readFileSync(filePath);
+    return data.toString();
+  } catch (error) {
+    console.error(`Got an error trying to read the file: ${error.message}`);
   }
-
-  if (directoriesArray.length === 0) return existingDirectory;
-
-  for (let dir of directoriesArray) {
-    existingDirectory[dir] = {}
-  }
-
-
-  return existingDirectory
 }
 
+const input = readFile('./day7/day7Input.txt');
+// END OF GET FILE INPUT
+
+
+function factoryDirectory(filesArray, directoriesArray, workingDirectory) {
+  if (filesArray.length > 0) {
+    workingDirectory.files = filesArray
+  }
+
+  if (directoriesArray.length === 0) return workingDirectory;
+
+  for (let dir of directoriesArray) {
+    workingDirectory[dir] = {
+      parentDirectory: workingDirectory
+    }
+  }
+
+
+  return workingDirectory;
+}
 
 
 let fileSystem = {
+  home: {
 
+  }
 }
+
 
 function createFile(line) {
   line = line.split(' ');
@@ -56,13 +47,12 @@ function createFile(line) {
   }
 }
 
-function changeDirectory(line, directoryStack) {
+
+function changeDirectory(line, workingDirectory) {
   if (line.includes('..')) {
-    directoryStack.pop();
-    return directoryStack;
+    return workingDirectory.parentDirectory;
   }
-  directoryStack.push(directoryStack[directoryStack.length - 1][getDirectoryName(line)]);
-  return directoryStack;
+  return workingDirectory[getDirectoryName(line)];
 }
 
 function isCommand(line) {
@@ -84,9 +74,6 @@ function createDirectory(input, directory) {
 
   // directory is just the base object
   let workingDirectory = directory;
-
-  // keep track of past movements by using a stack… so that you can do $ cd ..
-  let directoryStack = [directory]
 
   // keeping track of files currently being read
   let dirs = [];
@@ -114,8 +101,7 @@ function createDirectory(input, directory) {
       dirs = [];
       files = [];
       isReading = false;
-      directoryStack = changeDirectory(line, directoryStack);
-      workingDirectory = directoryStack[directoryStack.length - 1]
+      workingDirectory = changeDirectory(line, workingDirectory);
       continue;
     }
 
@@ -129,11 +115,76 @@ function createDirectory(input, directory) {
     }
   }
 
-  return directoryStack[directoryStack.length - 1]
+  if (dirs.length > 0 || files.length > 0) {
+    factoryDirectory(files, dirs, workingDirectory)
+  }
+
+  while (workingDirectory.hasOwnProperty('parentDirectory')) {
+    workingDirectory = workingDirectory.parentDirectory;
+  }
+
+  return workingDirectory;
 
 }
 
-console.log(createDirectory(input, fileSystem))
+const finalDirectory = createDirectory(input, fileSystem);
 
+function sumFiles(arrayOfFiles) {
+  let sumOfFiles = 0;
+  for (file of arrayOfFiles) {
+    sumOfFiles += Number(file.size);
+  }
 
-//TODO: Maybe add parent directory to each child directory similarly to a linked list
+  return sumOfFiles;
+}
+
+function sumDirectory(directory) {
+  let totalSize = 0;
+
+  for (const prop of Object.entries(directory)) {
+    if (prop.includes('parentDirectory')) {
+      continue;
+    }
+
+    if (prop.includes('files')) {
+      totalSize = totalSize + sumFiles(prop[1])
+      continue;
+    }
+
+    if (prop[1].hasOwnProperty('parentDirectory')) {
+      totalSize += sumDirectory(prop[1]);
+    }
+
+  }
+
+  return totalSize
+}
+
+function findGoodDirectories(homeDirectory) {
+  let directories = [homeDirectory];
+  let goodTotals = [];
+  let total = 0;
+
+  for (const dir of directories) {
+    for (const prop of Object.entries(dir)) {
+      if (prop[1].hasOwnProperty('parentDirectory')) {
+        if (directories.includes(prop[1])) continue;
+        directories.push(prop[1]);
+      }
+    }
+  }
+
+  for (const dir of directories) {
+    let currentSum = sumDirectory(dir)
+    if (currentSum < 100000) {
+      goodTotals.push(currentSum)
+    }
+  }
+
+  for (const currentTotal of goodTotals) {
+    total = total + currentTotal;
+  }
+  return total;
+}
+
+console.log(findGoodDirectories(finalDirectory))
