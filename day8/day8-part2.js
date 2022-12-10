@@ -25,6 +25,8 @@ function createGrid(input) {
 }
 
 function isVisibleLeft(grid, rowIndex, treeIndex, currentRow, currentTree) {
+  let score = 0;
+
   while (grid[rowIndex][treeIndex] !== undefined) {
     treeIndex = treeIndex - 1;
 
@@ -32,18 +34,25 @@ function isVisibleLeft(grid, rowIndex, treeIndex, currentRow, currentTree) {
       break;
     }
 
-    if (currentTree <= Number(currentRow[treeIndex])) {
-      console.log(grid[rowIndex][treeIndex])
-      return false;
+    if (currentTree > Number(currentRow[treeIndex])) {
+      score = score + 1;
+      continue;
     }
 
-    
+    if (currentTree <= Number(currentRow[treeIndex])) {
+      score = score + 1;
+      break;
+    }
+
+
   }
 
-  return true;
+  return score;
 }
 
 function isVisibleRight(grid, rowIndex, treeIndex, currentRow, currentTree) {
+  let score = 0;
+
   while (grid[rowIndex][treeIndex] !== undefined) {
     treeIndex = treeIndex + 1;
 
@@ -51,28 +60,45 @@ function isVisibleRight(grid, rowIndex, treeIndex, currentRow, currentTree) {
       break;
     }
 
+    if (currentTree > Number(currentRow[treeIndex])) {
+      score = score + 1;
+      continue;
+    }
+
     if (currentTree <= Number(currentRow[treeIndex])) {
-      return false;
+      score = score + 1;
+      break;
     }
   }
-  return true;
+  return score;
 }
 
 function isVisibleFront(grid, rowIndex, treeIndex, currentTree) {
+  let score = 0;
+
   while (grid[rowIndex][treeIndex] !== undefined) {
     rowIndex = rowIndex - 1;
-    
+
     if (rowIndex < 0) {
       break;
     }
+
+    if (currentTree > Number(grid[rowIndex][treeIndex])) {
+      score = score + 1;
+      continue;
+    }
+
     if (currentTree <= Number(grid[rowIndex][treeIndex])) {
-      return false;
+      score = score + 1;
+      break;
     }
   }
-  return true;
+  return score;
 }
 
 function isVisibleBack(grid, rowIndex, treeIndex, currentTree) {
+  let score = 0;
+
   while (grid[rowIndex][treeIndex] !== undefined) {
     rowIndex = rowIndex + 1;
 
@@ -80,50 +106,52 @@ function isVisibleBack(grid, rowIndex, treeIndex, currentTree) {
       break;
     }
 
+    if (currentTree > Number(grid[rowIndex][treeIndex])) {
+      score = score + 1;
+      continue;
+    }
+
     if (currentTree <= Number(grid[rowIndex][treeIndex])) {
-      return false;
+      score = score + 1;
+      break;
     }
   }
-  return true;
+  return score;
 }
 
 function checkVisibility(grid, rowIndex, treeIndex) {
   let currentRow = grid[rowIndex]
   let currentTree = Number(currentRow[treeIndex]);
 
-  if (isVisibleLeft(grid, rowIndex, treeIndex, currentRow, currentTree) === true) return 1;
+  const score1 = isVisibleLeft(grid, rowIndex, treeIndex, currentRow, currentTree);
 
-  if (isVisibleRight(grid, rowIndex, treeIndex, currentRow, currentTree) === true) return 1;
+  const score2 = isVisibleRight(grid, rowIndex, treeIndex, currentRow, currentTree);
 
-  if (isVisibleFront(grid, rowIndex, treeIndex, currentTree) === true) return 1;
+  const score3 = isVisibleFront(grid, rowIndex, treeIndex, currentTree);
 
-  if (isVisibleBack(grid, rowIndex, treeIndex, currentTree) === true) return 1;
+  const score4 = isVisibleBack(grid, rowIndex, treeIndex, currentTree);
 
-  return 0;
+  return score1 * score2 * score3 * score4;
 }
 
 function totalVisibleTrees(grid) {
-  let total = 0;
+  let mostScenic = 0;
   const rowLength = grid[0].length
   let rowIndex;
 
-  total = total + (rowLength * 2);
-  total = total + ((grid.length * 2) - 4);
-
-  // skipping outer rows / columns
-  for (let i = 1; i <= grid.length - 2; i++) {
+  for (let i = 0; i <= grid.length - 1; i++) {
     rowIndex = i;
-    for (let i = 1; i <= rowLength - 2; i++) {
-      total = total + checkVisibility(grid, rowIndex, i);
+    for (let i = 0; i <= rowLength - 1; i++) {
+      treeHouseScore = checkVisibility(grid, rowIndex, i);
+      if (treeHouseScore > mostScenic) {
+        mostScenic = treeHouseScore;
+      }
     }
   }
 
-  return total;
+  return mostScenic;
 }
 
 const grid = createGrid(input);
-console.log(grid)
-
-// console.log(checkVisibility(grid, 1, 2));
 
 console.log(totalVisibleTrees(grid))
