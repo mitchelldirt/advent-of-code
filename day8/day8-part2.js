@@ -131,7 +131,7 @@ function checkVisibility(grid, rowIndex, treeIndex) {
 
   const score4 = isVisibleBack(grid, rowIndex, treeIndex, currentTree);
 
-  return score1 * score2 * score3 * score4;
+  return score1 * score2 * score3 * score;
 }
 
 function totalVisibleTrees(grid) {
